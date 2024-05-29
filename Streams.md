@@ -972,5 +972,3 @@ End
 ```
 
 The above code is concise, easy to understand, the code is choesive (It does one thing and one thing only).
-
-# Start from 2:24:00 Charectistics of streams

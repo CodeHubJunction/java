@@ -191,6 +191,78 @@ System.out.println(
 		.reduce(0, (e, total) -> Integer.sum(total, e)));
 		
 ```
+
+for better analysis:
+
+```
+BinaryOperator<Integer> binaryOperatorAccumulator = (total, e) -> {
+			int result =total+e;
+			System.out.println("Accumulator: Total = " + total + ", Element = " + e+" , Result = "+result);
+			return result;
+		};
+
+int sum = numbers.stream().reduce(0, binaryOperatorAccumulator);
+```
+the output is 
+
+```
+Accumulator: Total = 0, Element = 1 , Result = 1
+Accumulator: Total = 1, Element = 2 , Result = 3
+Accumulator: Total = 3, Element = 3 , Result = 6
+Accumulator: Total = 6, Element = 4 , Result = 10
+Accumulator: Total = 10, Element = 5 , Result = 15
+Accumulator: Total = 15, Element = 6 , Result = 21
+Accumulator: Total = 21, Element = 7 , Result = 28
+Accumulator: Total = 28, Element = 8 , Result = 36
+Accumulator: Total = 36, Element = 9 , Result = 45
+Accumulator: Total = 45, Element = 10 , Result = 55
+Sum = 55
+
+```
+
+While using parallel Stream. 
+
+```
+	BinaryOperator<Integer> binaryOperatorAccumulator = (total, e) -> {
+			int result =total+e;
+			System.out.println("Accumulator: Total = " + total + ", Element = " + e+" , Result = "+result);
+			return result;
+		};
+
+		 BinaryOperator<Integer> combiner = (a, b) -> {
+			 int result = a+b;
+	            System.out.println("Combiner: A = " + a + ", B = " + b+" , Result = "+result);
+	            return a + b;
+	        };
+
+		int sum = numbers.stream().parallel().reduce(0, binaryOperatorAccumulator, combiner);
+```
+outPut:
+
+```
+Accumulator: Total = 0, Element = 7 , Result = 7
+Accumulator: Total = 0, Element = 2 , Result = 2
+Accumulator: Total = 0, Element = 9 , Result = 9
+Accumulator: Total = 0, Element = 1 , Result = 1
+Accumulator: Total = 0, Element = 3 , Result = 3
+Combiner: A = 1, B = 2 , Result = 3
+Accumulator: Total = 0, Element = 5 , Result = 5
+Accumulator: Total = 0, Element = 8 , Result = 8
+Accumulator: Total = 0, Element = 10 , Result = 10
+Combiner: A = 9, B = 10 , Result = 19
+Combiner: A = 8, B = 19 , Result = 27
+Accumulator: Total = 0, Element = 4 , Result = 4
+Combiner: A = 4, B = 5 , Result = 9
+Combiner: A = 3, B = 9 , Result = 12
+Combiner: A = 3, B = 12 , Result = 15
+Accumulator: Total = 0, Element = 6 , Result = 6
+Combiner: A = 6, B = 7 , Result = 13
+Combiner: A = 13, B = 27 , Result = 40
+Combiner: A = 15, B = 40 , Result = 55
+Sum = 55
+
+```
+
 This can be further reduced by method referencing. As mentioned earlier method referencing the order of the parameter is very important but in case of sum it does not  matter. 
 
 ```
@@ -972,3 +1044,5 @@ End
 ```
 
 The above code is concise, easy to understand, the code is choesive (It does one thing and one thing only).
+
+# Start from 2:24:00 Charectistics of streams

@@ -127,18 +127,6 @@ Here are some common pitfalls to avoid when using lambda expressions:
 - The return statement is required when the lambda expression body is a block statement and it needs to return a value.
 - The () is required when the lambda expression has no arguments or when the type of the arguments is explicitly specified.
 
-## Key Concepts
-
-- _Lambda expression_: A concise way to represent a function or a block of code.
-- _Functional interface_: An interface that has a single abstract method (SAM).
-- _SAM_: Single abstract method.
-
-## Use Cases
-
-- _Event handling_: Lambda expressions can be used to handle events, such as button clicks or keyboard input.
-- _Data processing_: Lambda expressions can be used to process data, such as filtering or mapping data.
-- _Functional programming_: Lambda expressions can be used to implement functional programming concepts, such as map, filter, and reduce.
-
 # Type Inference in Lambda Expressions: Step-by-Step Explanation
 
 ## Introduction
@@ -221,124 +209,6 @@ Lambda expressions have several characteristics:
 - _Function_: Lambda expressions represent a function or a block of code that can be executed.
 - _Passed as an argument_: Lambda expressions can be passed as an argument to a method.
 - _Returned from a method_: Lambda expressions can be returned from a method.
-
-# Method References in Java
-
-## Introduction
-
-Method references are a shorthand way of expressing lambda expressions that call a specific method. They are denoted by the double colon (::) operator.
-
-## Types of Method References
-
-There are three types of method references:
-
-1.  `_Static Method References_`: These are used to reference static methods.
-2.  `_Instance Method References_`: These are used to reference instance methods.
-3.  `_Constructor References_`: These are used to reference constructors.
-
-## Examples
-
-Here are some examples of method references:
-
-### Static Method References
-
-```java
-// Use a lambda expression to parse a string to an integer
-Function<String, Integer> parser = s -> Integer.parseInt(s);
-
-// Use a static method reference to parse a string to an integer
-Function<String, Integer> parserRef = Integer::parseInt;
-
-// Test the parser and parserRef
-System.out.println(parser.apply("123")); // prints 123
-System.out.println(parserRef.apply("123")); // prints 123
-```
-
-- In this example, `System.out::println` is an instance method reference that references the println method of the PrintStream instance represented by System.out.
-
-### Instance Method References
-
-```java
-// Using a lambda expression
-List<String> list = Arrays.asList("a", "b", "c");
-list.forEach(s -> System.out.println(s));
-
-// Using a method reference
-list.forEach(System.out::println);
-```
-
-- In this example, System.out::println is an instance method reference that references the println method of the PrintStream instance represented by System.out.
-
-### Instance Method References
-
-```java
-// Using a lambda expression
-List<String> list = Arrays.asList("a", "b", "c");
-list.forEach(s -> s.toUpperCase());
-
-// Using a method reference
-list.forEach(String::toUpperCase);
-```
-
-- However, the above example will not work as expected because forEach expects a Consumer that consumes a String and returns nothing, but String::toUpperCase returns a String. To fix this, we can use a lambda expression or a method reference with a Consumer that consumes a String and prints its uppercase version.
-
-```java
-list.stream().map(String::toUpperCase).forEach(System.out::println);
-```
-
-### Constructor References
-
-```java
-// Using a lambda expression
-Supplier<List<String>> supplier = () -> new ArrayList<>();
-
-// Using a constructor reference
-Supplier<List<String>> supplier = ArrayList::new;
-```
-
-- In this example, ArrayList::new is a constructor reference that references the no-arg constructor of the ArrayList class.
-
-## Lambda Expressions vs Method References
-
-Lambda expressions and method references are both used to represent a function or a block of code that can be executed. However, they differ in their syntax and usage.
-
-- `_Lambda Expressions_`: Lambda expressions are a more general way of representing a function or a block of code. They can be used to represent any kind of function, including those that are not associated with a specific method.
-- `_Method References_`: Method references are a shorthand way of expressing lambda expressions that call a specific method. They are more concise and readable than lambda expressions, but they are limited to referencing existing methods.
-
-## When to Use Method References
-
-Method references are a good choice when:
-
-- You need to reference an existing method.
-- You want to make your code more concise and readable.
-
-## When to Use Lambda Expressions
-
-Lambda expressions are a good choice when:
-
-- You need to represent a function or a block of code that is not associated with a specific method.
-- You need more flexibility in your code.
-
-## Summary
-
-- Method references are a shorthand way of expressing lambda expressions that call a specific method.
-- There are three types of method references: static method references, instance method references, and constructor references.
-- Method references are more concise and readable than lambda expressions, but they are limited to referencing existing methods.
-
-## Key Concepts
-
-- _Method references_: A shorthand way of expressing lambda expressions that call a specific method.
-- _Lambda expressions_: A more general way of representing a function or a block of code.
-
-## Use Cases
-
-- _Event handling_: Method references can be used to handle events, such as button clicks or keyboard input.
-- _Data processing_: Method references can be used to process data, such as filtering or mapping data.
-
-## Best Practices
-
-- _Use method references when possible_: Method references are more concise and readable than lambda expressions, so use them when possible.
-- _Use lambda expressions when necessary_: Lambda expressions are more flexible than method references, so use them when necessary.
 
 # Accessing Variables in Lambda Expressions
 
@@ -469,6 +339,174 @@ r.run();
 
 }
 ```
+
+Alright — I’ll explain **SAM types & overload resolution** in Java 8,
+covering **rules**, **ambiguity**, and **disambiguation**, and give you everything in **Markdown** so you can keep it as notes.
+
+---
+
+# 📘 Java 8 — SAM Types & Overload Resolution
+
+## 1️⃣ What is a SAM Type?
+
+- **SAM** = **Single Abstract Method** type.
+- A **functional interface** is a SAM type — it has **exactly one** abstract method.
+- **Lambda expressions** and **method references** can be used wherever a SAM type is expected.
+
+### Example:
+
+```java
+@FunctionalInterface
+interface MyPrinter {
+    void print(String msg);
+}
+
+public class SamExample {
+    public static void main(String[] args) {
+        MyPrinter p = (m) -> System.out.println(m); // Lambda → SAM type
+        p.print("Hello SAM!");
+    }
+}
+```
+
+---
+
+## 2️⃣ SAM Rules in Java
+
+1. **One Abstract Method Only**
+
+   - Can have any number of `default` or `static` methods.
+   - Annotation `@FunctionalInterface` is optional but recommended.
+
+2. **Target Typing**
+
+   - A lambda has **no type by itself**; the type is inferred from the **target functional interface**.
+
+3. **Overriding `Object` Methods**
+
+   - Methods like `equals()`, `hashCode()` in a functional interface **do not count** towards the single abstract method requirement.
+
+---
+
+## 3️⃣ Overload Resolution Problem with SAM Types
+
+If you have **two overloaded methods** that take **different functional interfaces** with the **same lambda parameter shape**, the compiler **can’t decide** which to call → **ambiguity error**.
+
+### Example: Ambiguity
+
+```java
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+public class OverloadAmbiguity {
+    static void process(Consumer<String> c) {
+        System.out.println("Consumer called");
+        c.accept("Test");
+    }
+
+    static void process(Function<String, String> f) {
+        System.out.println("Function called");
+        f.apply("Test");
+    }
+
+    public static void main(String[] args) {
+        // ❌ Ambiguity — both take a String parameter
+        // process(s -> s.toUpperCase());
+    }
+}
+```
+
+**Compiler Error:**
+
+```
+reference to process is ambiguous
+```
+
+---
+
+## 4️⃣ Disambiguation Techniques
+
+### **A) Casting the Lambda**
+
+Explicitly tell the compiler the intended SAM type.
+
+```java
+process((Function<String, String>) s -> s.toUpperCase()); // ✅ Function
+process((Consumer<String>) s -> System.out.println(s));   // ✅ Consumer
+```
+
+---
+
+### **B) Using Method References**
+
+Sometimes method references make the target type clear.
+
+```java
+process(System.out::println);          // Matches Consumer<String>
+process(String::toUpperCase);          // Matches Function<String, String>
+```
+
+---
+
+### **C) Generic Type Witness**
+
+If the method is generic, you can **provide type parameters** to guide resolution.
+
+```java
+class GenericExample {
+    static <T> void execute(Function<T, T> f) {
+        System.out.println("Function<T, T>");
+    }
+    static <T> void execute(Consumer<T> c) {
+        System.out.println("Consumer<T>");
+    }
+
+    public static void main(String[] args) {
+        // Type witness helps choose Function
+        GenericExample.<String>execute(s -> s.toUpperCase());
+    }
+}
+```
+
+---
+
+### **D) Changing Lambda Form**
+
+Changing lambda to match **return type** or **void** can disambiguate.
+
+```java
+process(s -> { System.out.println(s); }); // Matches Consumer
+process(s -> { return s.toUpperCase(); }); // Matches Function
+```
+
+---
+
+## 📌 Summary Table
+
+| Problem Area            | Cause                                                   | Fix                        |
+| ----------------------- | ------------------------------------------------------- | -------------------------- |
+| Ambiguous overload      | Multiple functional interfaces with same parameter list | Cast to intended interface |
+| Unclear lambda type     | Lambda form fits both                                   | Add return/void explicitly |
+| Generic methods         | Type inference picks multiple                           | Use generic type witness   |
+| Both fit via method ref | Method reference matches multiple                       | Use explicit cast          |
+
+---
+
+## ✅ Key Takeaways
+
+- **SAM** = Single Abstract Method → basis of functional interfaces.
+- Overload resolution can fail if two methods accept different functional interfaces but share the **same parameter signature**.
+- Resolve ambiguity by:
+
+  1. **Casting** the lambda
+  2. Using **method references**
+  3. Supplying **generic type witness**
+  4. Adjusting **lambda body** to match only one functional interface
+
+---
+
+If you want, I can also give you **one runnable Java file** containing **all 4 disambiguation examples** so you can compile & see which one gets called in each case.
+Do you want me to prepare that? That would make this even more practical.
 
 ## Summary
 
